@@ -1,7 +1,6 @@
 package com.example.tagtrainermobile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import com.example.tagtrainermobile.utils.FirebaseAnalyticsHelper
 class LoginFragment : Fragment() {
 
     val user = User.sigleUser.instance
-
     val cartProducts = Product.SingleCart.singleCartinstance
 
     override fun onCreateView(
@@ -32,29 +30,11 @@ class LoginFragment : Fragment() {
         setButtonLoginConfig()
 
         val itemBundles = cartProducts.map { item ->
-
-            Bundle().apply {
-                putString("item_name", item.name)
-                putInt("quantity", item.quantity)
-                putDouble("price", item.price)
-                putString("currency", "BRL")
-            }
+            FirebaseAnalyticsHelper.createItemBundle(item.name, item.quantity, item.price)
         }.toTypedArray()
 
-        var total: Double = 0.0
-
-        for (bundle in itemBundles) {
-            val quantity = bundle.getInt("quantity", 0) // Valor padrão 0 se não estiver presente
-            val price = bundle.getDouble("price", 0.0) // Valor padrão 0.0 se não estiver presente
-            total += quantity * price
-        }
-
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", itemBundles)
-            putString("currency", "BRL")
-            putDouble("value", total)
-        }
-
+        val totalLogin = FirebaseAnalyticsHelper.calculateTotalValue(itemBundles)
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles, value = totalLogin)
         FirebaseAnalyticsHelper.logEvent("begin_checkout", paramsEvent)
     }
 
@@ -70,6 +50,7 @@ class LoginFragment : Fragment() {
                 user.isLogged = true
                 val paymentFragment = PaymentFragment()
               getFragmentManager()?.beginTransaction()?.add(R.id.fragmentPaymentId, paymentFragment)?.commit()
+                FirebaseAnalyticsHelper.logEvent("login", Bundle())
             }
         })
     }

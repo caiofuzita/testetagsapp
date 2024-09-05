@@ -29,20 +29,12 @@ class PurchaseActivity : AppCompatActivity() {
         displayPurchaseItems()
 
         val itemBundles = cartProducts.map { item ->
-
-            Bundle().apply {
-                putString("item_name", item.name)
-                putInt("quantity", item.quantity)
-                putDouble("price", item.price)
-                putString("currency", "BRL")
-            }
+            FirebaseAnalyticsHelper.createItemBundle(item.name, item.quantity, item.price)
         }.toTypedArray()
 
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", itemBundles)
-            putString("currency", "BRL")
-            putDouble("value", value)
-        }
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles, value = value)
+
+        paramsEvent.putString("transaction_id", transactionId)
 
         FirebaseAnalyticsHelper.logEvent("purchase", paramsEvent)
     }

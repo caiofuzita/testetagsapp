@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         menu.setSearchableInfo(searchManager.getSearchableInfo(componentName))
     }
 
-    fun onClickedProducts(v: ListView, p: Int) { // Produtos -> clicar em um produto
+    fun onClickedProducts(v: ListView, p: Int) {
         val intent = Intent(applicationContext, ProductActivity::class.java)
 
         val params = Bundle()
@@ -40,18 +40,23 @@ class MainActivity : AppCompatActivity() {
 
         startActivity(intent)
 
+        val itemBundles = FirebaseAnalyticsHelper.createItemBundle(listingProducts[p].listProdName, 1,listingProducts[p].listProdPrice)
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = listingProducts[p].listProdPrice)
+        FirebaseAnalyticsHelper.logEvent("select_item", paramsEvent)
+
+        Log.d("testando", p.toString())
     }
 
     fun filteredProductsList() : ArrayList<ListingProduct> {
         val listCategory = intent.getStringExtra("listType")
 
         val categoryList = ArrayList<ListingProduct>()
-            for(i in listingProducts) {
-                if(i.listProdCat == listCategory) {
-                    categoryList.add(i)
-                }
+        for(i in listingProducts) {
+            if(i.listProdCat == listCategory) {
+                categoryList.add(i)
             }
-            if (categoryList.size <= 0) return listingProducts
+        }
+        if (categoryList.size <= 0) return listingProducts
         return categoryList
     }
 
@@ -59,10 +64,16 @@ class MainActivity : AppCompatActivity() {
         val table: ListView = findViewById(R.id.tableID)
         val adapter = ListProductsAdapter(this, filteredProductsList())
         table.adapter = adapter
-            table.setOnItemClickListener { parent, view, position, id ->
-                onClickedProducts(table, filteredProductsList().get(position).listProdId-1)
-            }
-        Log.d("Testando", "displayListingPage")
+        table.setOnItemClickListener { parent, view, position, id ->
+            onClickedProducts(table, filteredProductsList().get(position).listProdId-1)
+        }
+
+        val itemBundles = listingProducts.map { item ->
+            FirebaseAnalyticsHelper.createItemBundle(item.listProdName, 1, item.listProdPrice)
+        }.toTypedArray()
+
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles)
+        FirebaseAnalyticsHelper.logEvent("view_item_list", paramsEvent)
     }
 }
 

@@ -1,7 +1,5 @@
 package com.example.tagtrainermobile
 
-import android.util.Log
-
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -34,7 +32,6 @@ class HomeActivity : AppCompatActivity() {
         setHomeBanners()
         homeClickButton()
         setHomeCards()
-
         FirebaseAnalyticsHelper.init(this)
     }
 
@@ -166,6 +163,9 @@ class HomeActivity : AppCompatActivity() {
             buttonBuyCardId.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View?) {
                     onClickCardAction(firstProductCard.listProdId)
+                    val itemBundles = FirebaseAnalyticsHelper.createItemBundle(firstProductCard.listProdName, 1, firstProductCard.listProdPrice)
+                    val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = firstProductCard.listProdPrice)
+                    FirebaseAnalyticsHelper.logEvent("select_item", paramsEvent)
                 }
             })
 
@@ -181,6 +181,9 @@ class HomeActivity : AppCompatActivity() {
             buttonBuyCardId2.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View?) {
                     onClickCardAction(secondProductCard.listProdId)
+                    val itemBundles = FirebaseAnalyticsHelper.createItemBundle(secondProductCard.listProdName, 1, secondProductCard.listProdPrice)
+                    val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = secondProductCard.listProdPrice)
+                    FirebaseAnalyticsHelper.logEvent("select_item", paramsEvent)
                 }
             })
             container.addView(view)
@@ -206,6 +209,7 @@ class HomeActivity : AppCompatActivity() {
             override fun onClick(view: View?) {
                 val intent = Intent(applicationContext, MainActivity::class.java)
                 startActivity(intent)
+                FirebaseAnalyticsHelper.logEvent("clique_btn_produtos", Bundle())
             }
         })
     }
@@ -223,7 +227,7 @@ class HomeActivity : AppCompatActivity() {
             putString("creative_name", p)
         }
 
-        FirebaseAnalyticsHelper.logEvent("view_promotion", paramsEvent)
+        FirebaseAnalyticsHelper.logEvent("select_promotion", paramsEvent)
     }
 
     fun setHomeCards() {
@@ -239,17 +243,5 @@ class HomeActivity : AppCompatActivity() {
         intent.putExtras(params)
 
         startActivity(intent)
-
-//
-//        val itemBundle = Bundle().apply {
-//            putString("item_id", p.toString())
-//        }
-//
-//        val paramsEvent = Bundle().apply {
-//            putParcelableArray("items", arrayOf(itemBundle))
-//            putString("currency", "BRL")
-//        }
-//
-//        FirebaseAnalyticsHelper.logEvent("view_item", paramsEvent)
     }
 }

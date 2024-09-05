@@ -1,9 +1,3 @@
-pluginManagement {
-    repositories {
-        google()
-    }
-}
-
 rootProject.name = "TagTrainerMobile"
 include ':app'
 

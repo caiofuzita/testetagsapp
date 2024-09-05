@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tagtrainermobile.models.ListProductsAdapter
 import com.example.tagtrainermobile.models.ListingProduct
+import com.example.tagtrainermobile.utils.FirebaseAnalyticsHelper
 
 var listingProducts = ListingProduct.SingleList.singleListInstance
 var searchedItens = ArrayList<ListingProduct>()
@@ -25,6 +26,12 @@ class SearchableActivity : AppCompatActivity() {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
             doMySearch(query)
                 setSearcheableConfiguration(query)
+
+                val paramsEvent = Bundle().apply {
+                    putString("search_term", query)
+                }
+
+                FirebaseAnalyticsHelper.logEvent("search", paramsEvent)
             }
         }
     }

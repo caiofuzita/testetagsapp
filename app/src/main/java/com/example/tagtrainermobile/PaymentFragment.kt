@@ -9,16 +9,15 @@ import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.example.tagtrainermobile.models.Product
 import com.example.tagtrainermobile.models.User
 import com.example.tagtrainermobile.utils.FirebaseAnalyticsHelper
 import com.google.android.material.textfield.TextInputLayout
+import com.example.tagtrainermobile.models.Product
 
 
 class PaymentFragment : Fragment(), CartActivity.setRadioButtonsConfig {
 
     val user = User.sigleUser.instance
-
     val cartProducts = Product.SingleCart.singleCartinstance
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -33,29 +32,10 @@ class PaymentFragment : Fragment(), CartActivity.setRadioButtonsConfig {
         setRadioButtonsConfig()
 
         val itemBundles = cartProducts.map { item ->
-
-            Bundle().apply {
-                putString("item_name", item.name)
-                putInt("quantity", item.quantity)
-                putDouble("price", item.price)
-                putString("currency", "BRL")
-            }
+            FirebaseAnalyticsHelper.createItemBundle(item.name, item.quantity, item.price)
         }.toTypedArray()
-
-        var total: Double = 0.0
-
-        for (bundle in itemBundles) {
-            val quantity = bundle.getInt("quantity", 0) // Valor padrão 0 se não estiver presente
-            val price = bundle.getDouble("price", 0.0) // Valor padrão 0.0 se não estiver presente
-            total += quantity * price
-        }
-
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", itemBundles)
-            putString("currency", "BRL")
-            putDouble("value", total)
-        }
-
+        val totalPayment = FirebaseAnalyticsHelper.calculateTotalValue(itemBundles)
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles, value = totalPayment)
         FirebaseAnalyticsHelper.logEvent("add_payment_info", paramsEvent)
     }
 
@@ -90,30 +70,13 @@ class PaymentFragment : Fragment(), CartActivity.setRadioButtonsConfig {
 //                                startActivity(intent)
 //                                Toast.makeText(getActivity(), "oiioi", Toast.LENGTH_SHORT).show()
                             }
-                            val itemBundles = cartProducts.map { item ->
 
-                                Bundle().apply {
-                                    putString("item_name", item.name)
-                                    putInt("quantity", item.quantity)
-                                    putDouble("price", item.price)
-                                    putString("currency", "BRL")
-                                }
+                            val itemBundles = cartProducts.map { item ->
+                                FirebaseAnalyticsHelper.createItemBundle(item.name, item.quantity, item.price)
                             }.toTypedArray()
 
-                            var total: Double = 0.0
-
-                            for (bundle in itemBundles) {
-                                val quantity = bundle.getInt("quantity", 0) // Valor padrão 0 se não estiver presente
-                                val price = bundle.getDouble("price", 0.0) // Valor padrão 0.0 se não estiver presente
-                                total += quantity * price
-                            }
-
-                            val paramsEvent = Bundle().apply {
-                                putParcelableArray("items", itemBundles)
-                                putString("currency", "BRL")
-                                putDouble("value", total)
-                            }
-
+                            val totalPayment = FirebaseAnalyticsHelper.calculateTotalValue(itemBundles)
+                            val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles, value = totalPayment)
                             FirebaseAnalyticsHelper.logEvent("add_shipping_info", paramsEvent)
                         }
                     }

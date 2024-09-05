@@ -13,8 +13,6 @@ import com.example.tagtrainermobile.models.Product
 import com.example.tagtrainermobile.utils.FirebaseAnalyticsHelper
 import com.google.android.material.snackbar.Snackbar
 
-import android.util.Log
-
 class ProductActivity : AppCompatActivity() {
 
     var cartProducts = Product.SingleCart.singleCartinstance
@@ -64,8 +62,7 @@ class ProductActivity : AppCompatActivity() {
         val productDescText = listingProducts.get(idProduct).listProdDesc
         productDesc.text = productDescText
         val productPriceText = listingProducts.get(idProduct).listProdPrice
-        productPrice.text = "R$ " + idProduct.toString()
-
+        productPrice.text = "R$ " + productPriceText.toString()
 
         addProdButton.setOnClickListener(object : View.OnClickListener {
             override fun onClick(view: View?) {
@@ -73,19 +70,8 @@ class ProductActivity : AppCompatActivity() {
             }
         })
 
-        val itemBundles = Bundle().apply {
-            putString("item_name", productName)
-            putInt("quantity", 1)
-            putDouble("price", productPriceText.toDouble())
-            putString("currency", "BRL")
-        }
-
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", arrayOf(itemBundles))
-            putString("currency", "BRL")
-            putDouble("value", productPriceText.toDouble())
-        }
-
+        val itemBundles = FirebaseAnalyticsHelper.createItemBundle(productName, 1, productPriceText.toDouble())
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = productPriceText.toDouble())
         FirebaseAnalyticsHelper.logEvent("view_item", paramsEvent)
     }
 
@@ -107,19 +93,8 @@ class ProductActivity : AppCompatActivity() {
         Snackbar.make(v, "Produto Adicionado ao carrinho: " + productAdded.name, Snackbar.LENGTH_LONG)
             .show()
 
-        val itemBundles = Bundle().apply {
-            putString("item_name", productAdded.name)
-            putInt("quantity", 1)
-            putDouble("price", productAdded.price)
-            putString("currency", "BRL")
-        }
-
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", arrayOf(itemBundles))
-            putString("currency", "BRL")
-            putDouble("value", productAdded.price)
-        }
-
+        val itemBundles = FirebaseAnalyticsHelper.createItemBundle(productAdded.name, 1, productAdded.price)
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = productAdded.price)
         FirebaseAnalyticsHelper.logEvent("add_to_cart", paramsEvent)
     }
 }

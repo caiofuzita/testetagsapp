@@ -16,11 +16,28 @@ object FirebaseAnalyticsHelper {
         firebaseAnalytics.logEvent(eventName, params)
     }
 
-    fun setUserId(userId: String) {
-        firebaseAnalytics.setUserId(userId)
+    fun createItemBundle(name: String, quantity: Int, price: Double, currency: String = "BRL"): Bundle {
+        return Bundle().apply {
+            putString("item_name", name)
+            putInt("quantity", quantity)
+            putDouble("price", price)
+            putString("currency", currency)
+        }
     }
 
-    fun setUserProperty(propertyName: String, value: String) {
-        firebaseAnalytics.setUserProperty(propertyName, value)
+    fun createEventParams(items: Array<Bundle>, currency: String = "BRL", value: Double? = null): Bundle {
+        return Bundle().apply {
+            putParcelableArray("items", items)
+            putString("currency", currency)
+            value?.let { putDouble("value", it) }
+        }
+    }
+
+    fun calculateTotalValue(items: Array<Bundle>): Double {
+        return items.sumOf { bundle ->
+            val quantity = bundle.getInt("quantity", 0)
+            val price = bundle.getDouble("price", 0.0)
+            quantity * price
+        }
     }
 }

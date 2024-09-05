@@ -32,21 +32,10 @@ class CartActivity : AppCompatActivity() {
         setCheckoutButtonConfig()
 
         val itemBundles = cartProducts.map { item ->
-
-            Bundle().apply {
-                putString("item_name", item.name)
-                putInt("quantity", item.quantity)
-                putDouble("price", item.price)
-                putString("currency", "BRL")
-            }
+            FirebaseAnalyticsHelper.createItemBundle(item.name, item.quantity, item.price)
         }.toTypedArray()
-
-        val paramsEvent = Bundle().apply {
-            putParcelableArray("items", itemBundles)
-            putString("currency", "BRL")
-            putDouble("value", cartTotalPrice())
-        }
-
+        val totalCart = FirebaseAnalyticsHelper.calculateTotalValue(itemBundles)
+        val paramsEvent = FirebaseAnalyticsHelper.createEventParams(itemBundles, value = totalCart)
         FirebaseAnalyticsHelper.logEvent("view_cart", paramsEvent)
     }
 
@@ -158,27 +147,15 @@ class CartActivity : AppCompatActivity() {
         if (existingProduct !== null) {
             cartProducts.forEach {
                 if (it.name == p.name) {
+                    val itemBundles = FirebaseAnalyticsHelper.createItemBundle(it.name, 1, unitaryPrice.listProdPrice)
+                    val paramsEvent = FirebaseAnalyticsHelper.createEventParams(arrayOf(itemBundles), value = unitaryPrice.listProdPrice)
+                    FirebaseAnalyticsHelper.logEvent("remove_from_cart", paramsEvent)
+
                     it.price = it.price - unitaryPrice.listProdPrice
                     it.quantity--
-                    val itemBundles = Bundle().apply {
-                            putString("item_name", it.name)
-                            putInt("quantity", 1)
-                            putDouble("price", unitaryPrice.listProdPrice)
-                            putString("currency", "BRL")
-                    }
-
-                    val paramsEvent = Bundle().apply {
-                        putParcelableArray("items", arrayOf(itemBundles))
-                        putString("currency", "BRL")
-                        putDouble("value", unitaryPrice.listProdPrice)
-                    }
-
-                    FirebaseAnalyticsHelper.logEvent("remove_from_cart", paramsEvent)
                 }
             }
-
         }
-
 
     }
 
